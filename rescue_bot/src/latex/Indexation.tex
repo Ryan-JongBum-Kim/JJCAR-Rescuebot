@@ -1,0 +1,113 @@
+\hypertarget{Indexation_ALGO}{}\doxysection{Algorithm}\label{Indexation_ALGO}
+The process of the multi-\/index construction is described in our \href{http://download.yandex.ru/company/cvpr2012.pdf}{\texttt{ paper}}. Here we provide the details of the implementation.~\newline
+~\newline
+After the vocabularies are trained (see below), the index construction progress in two stages\+: assigning points to multi-\/index entries (\char`\"{}coarse quantization\char`\"{}) and calculating information for reranking. Because one can use different reranking approaches for the same coarse quantization, the first stage of the algorithm saves the coarse quantizations for all points in the database to hard drive. These coarse quantizations are just the entry identifiers (e.\+g. codeword pairs). So if the file with coarse quantizations has already been produced there is no need to calculate them again (in this case, remove the flag --build\+\_\+coarse from the command line parameters).~\newline
+~\newline
+In the C\+PU, a multi-\/index consists of a long onedimensional array containing the compressed points aligned by entries (i.\+e. a group of points belonging to the same entry is stored contiguously) and a table containing the starting index in the array for every entry of the multi-\/index. The class Multi\+Indexer is thus a C++ template by the type of the record in this array. In this way, you can easy implement your own reranking approach by defining new structure New\+Record\+Type and implementing function Get\+Record$<$\+New\+Record\+Type$>$ for your structure.~\newline
+~\newline
+For index contstruction you should provide coarse vocabularies for building the multi-\/index structure and fine vocabularies for calculating the reranking information (assuming that you are using the provided reranking procedure). We assume that these files are prepared outside this code (C++ is not the simplest way to create vocabularies, just for your reference we provide a M\+A\+T\+L\+A\+B-\/script to create them below).~\newline
+ \hypertarget{Indexation_FORMATS}{}\doxysection{File formats}\label{Indexation_FORMATS}
+Our code uses the \href{http://corpus-texmex.irisa.fr}{\texttt{ .bvecs}} and \href{http://corpus-texmex.irisa.fr}{\texttt{ .fvecs}} file formats developed by I\+N\+R\+IA L\+E\+AR and T\+E\+X\+M\+EX groups.
+
+
+\begin{DoxyItemize}
+\item {\bfseries{Coarse vocabularies}}~\newline
+Our code assumes that coarse vocabularies are in the following format\+:~\newline
+4 bytes(one int32) -\/ number of items in each vocabulary (N)~\newline
+4 bytes(one int32) -\/ dimension of item (d)~\newline
+4$\ast$\+N$\ast$d$\ast$M bytes(\+N$\ast$d$\ast$\+M floats) -\/ vocabulary items one after another (M is the multiplicity of algorithm)~\newline
+~\newline
+Matlab script to build coarse vocabularies 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{clear all;}
+\DoxyCodeLine{}
+\DoxyCodeLine{all\_data = bvecs\_read(\textcolor{stringliteral}{'sift1M.bvecs'});}
+\DoxyCodeLine{}
+\DoxyCodeLine{all\_data = single(all\_data);}
+\DoxyCodeLine{vocabSize = 4096;}
+\DoxyCodeLine{\% add implementation of K-\/means}
+\DoxyCodeLine{vocab1 = your\_kmeans(single(all\_data(1:end/2,:)),vocabSize);}
+\DoxyCodeLine{vocab2 = your\_kmeans(single(all\_data(end/2+1:end,:)),vocabSize);}
+\DoxyCodeLine{}
+\DoxyCodeLine{file = fopen([\textcolor{stringliteral}{'sift1M\_double\_4096\_'} num2str(vocabSize) \textcolor{stringliteral}{'.dat'}], \textcolor{charliteral}{'w'});}
+\DoxyCodeLine{dim = size(vocab1, 1);}
+\DoxyCodeLine{sz = size(vocab1, 2);}
+\DoxyCodeLine{fwrite(file, dim, \textcolor{stringliteral}{'int32'});}
+\DoxyCodeLine{fwrite(file, sz, \textcolor{stringliteral}{'int32'});}
+\DoxyCodeLine{fwrite(file, vocab1, \textcolor{stringliteral}{'float'});}
+\DoxyCodeLine{fwrite(file, vocab2, \textcolor{stringliteral}{'float'});}
+\DoxyCodeLine{fclose(file);}
+\DoxyCodeLine{save([\textcolor{stringliteral}{'sift1M\_double\_4096\_'} num2str(vocabSize) \textcolor{stringliteral}{'.mat'}], \textcolor{stringliteral}{'vocab1'}, \textcolor{stringliteral}{'vocab2'});}
+\end{DoxyCode}
+
+\item {\bfseries{Fine vocabularies}}~\newline
+Our code assumes that fine vocabularies are in the following format\+:~\newline
+4 bytes(one int32) -\/ number of vocabularies (m)~\newline
+4 bytes(one int32) -\/ number of items in each vocabulary (N)~\newline
+4 bytes(one int32) -\/ dimension of item (d)~\newline
+4$\ast$\+N$\ast$d$\ast$m bytes(\+N$\ast$d$\ast$m floats) -\/ vocabulary items one after another~\newline
+ Matlab script to build fine vocabularies (used \href{http://www.vlfeat.org/}{\texttt{ Vl\+Feat}} library) 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{clear all;}
+\DoxyCodeLine{all\_data = fvecs\_read(\textcolor{stringliteral}{'sift1M.fvecs'});}
+\DoxyCodeLine{}
+\DoxyCodeLine{vocabSize = 4096;}
+\DoxyCodeLine{load([\textcolor{stringliteral}{'sift1M\_double\_'} num2str(vocabSize) \textcolor{stringliteral}{'.mat'}], \textcolor{stringliteral}{'vocab1'}, \textcolor{stringliteral}{'vocab2'});}
+\DoxyCodeLine{}
+\DoxyCodeLine{vocab1 = int32(vocab1);}
+\DoxyCodeLine{vocab2 = int32(vocab2);}
+\DoxyCodeLine{i1 = vl\_ikmeanspush(all\_data(1:end/2,:), vocab1);}
+\DoxyCodeLine{i2 = vl\_ikmeanspush(all\_data(end/2+1:end,:), vocab2);  }
+\DoxyCodeLine{residual = single(all\_data)-\/ single([vocab1(:,i1); vocab2(:,i2)]);}
+\DoxyCodeLine{bytes\_per\_point = 8;    }
+\DoxyCodeLine{}
+\DoxyCodeLine{D = size(residual,1) / bytes\_per\_point;}
+\DoxyCodeLine{residual\_vocab = cell(bytes\_per\_point,1);}
+\DoxyCodeLine{dist = cell(bytes\_per\_point,1);}
+\DoxyCodeLine{\textcolor{keywordflow}{for} m = 1:bytes\_per\_point}
+\DoxyCodeLine{    chunk = residual(D*m-\/D+1:D*m,:);}
+\DoxyCodeLine{    \% add implementation of K-\/means}
+\DoxyCodeLine{    residual\_vocab\{m\} = your\_kmeans(chunk,256);}
+\DoxyCodeLine{    dist\{m\} = vl\_alldist2(residual\_vocab\{m\});          }
+\DoxyCodeLine{end}
+\DoxyCodeLine{}
+\DoxyCodeLine{save([\textcolor{stringliteral}{'sift1M\_double\_4096\_8.mat'}],\textcolor{stringliteral}{'residual\_vocab'},\textcolor{stringliteral}{'dist'});}
+\DoxyCodeLine{}
+\DoxyCodeLine{file = fopen([\textcolor{stringliteral}{'sift1M\_double\_4096\_8.dat'}], \textcolor{charliteral}{'w'});}
+\DoxyCodeLine{vocabs\_count = size(residual\_vocab, 1);}
+\DoxyCodeLine{each\_vocab\_count = size(residual\_vocab\{1\}, 2);}
+\DoxyCodeLine{each\_vocab\_dim = size(residual\_vocab\{1\}, 1);}
+\DoxyCodeLine{fwrite(file, vocabs\_count, \textcolor{stringliteral}{'int32'});}
+\DoxyCodeLine{fwrite(file, each\_vocab\_count, \textcolor{stringliteral}{'int32'});}
+\DoxyCodeLine{fwrite(file, each\_vocab\_dim, \textcolor{stringliteral}{'int32'});}
+\DoxyCodeLine{\textcolor{keywordflow}{for} i = 1:vocabs\_count}
+\DoxyCodeLine{    \textcolor{keywordflow}{for} j = 1:each\_vocab\_count}
+\DoxyCodeLine{        a = residual\_vocab\{i\}(:,j);}
+\DoxyCodeLine{        fwrite(file, a, \textcolor{stringliteral}{'float'});}
+\DoxyCodeLine{    end}
+\DoxyCodeLine{end}
+\DoxyCodeLine{fclose(file);}
+\end{DoxyCode}
+
+\end{DoxyItemize}\hypertarget{Indexation_EXAMPLE}{}\doxysection{Indexing sample}\label{Indexation_EXAMPLE}
+To build an invertered index for a set of points you should run \char`\"{}indexer\+\_\+launcher\char`\"{} application with some command line parameters.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{-\/-\/threads\_count            -\/ the number of threads to use \textcolor{keywordflow}{for} the multi-\/threaded index construction}
+\DoxyCodeLine{-\/-\/multiplicity             -\/ the number of groups of dimensions the vectors will be split into. Equals 2 or 4 \textcolor{keywordflow}{for} the experiments in the paper.}
+\DoxyCodeLine{-\/-\/points\_file              -\/ the path to the file with the vector database (should be in .bvecs or .fvecs format)}
+\DoxyCodeLine{-\/-\/coarse\_vocabs\_file       -\/ the path to the file with the coarse vocabularies (see the format description above)}
+\DoxyCodeLine{-\/-\/fine\_vocabs\_file         -\/ the path to the file with fine vocabularies \textcolor{keywordflow}{for} reranking (see the format description above)}
+\DoxyCodeLine{-\/-\/input\_point\_type         -\/ \textcolor{stringliteral}{"BVEC"} or \textcolor{stringliteral}{"FVEC"}}
+\DoxyCodeLine{-\/-\/points\_count             -\/ the number of points to index}
+\DoxyCodeLine{-\/-\/space\_dim                -\/ the space dimensionality (e.g. 128 \textcolor{keywordflow}{for} SIFTs)}
+\DoxyCodeLine{-\/-\/files\_prefix             -\/ the common prefix \textcolor{keywordflow}{for} storing the multi-\/index files (used to control runs with different parameters)}
+\DoxyCodeLine{-\/-\/coarse\_quantization\_file -\/ the path to the file with coarse quantizations}
+\DoxyCodeLine{-\/-\/metainfo\_file            -\/ the path to the file with metainformation (deprecated, just write \textcolor{stringliteral}{"fake.txt"})}
+\DoxyCodeLine{-\/-\/use\_residuals            -\/ the reranking method flag. Specify it \textcolor{keywordflow}{if} you want to use residuals \textcolor{keywordflow}{for} reranking (Multi-\/D-\/ADC) and omit it \textcolor{keywordflow}{if} you want to use initial points (Multi-\/ADC)}
+\DoxyCodeLine{-\/-\/build\_coarse             -\/ specify \textcolor{keyword}{this} flag \textcolor{keywordflow}{if} you want to recompute coarse quantizations (otherwise, will use the previously computed, \textcolor{keywordflow}{if} available)}
+\end{DoxyCode}
+
+
+Windows users can try launch\+\_\+indexer.\+bat script. It launches indexing of the \href{http://corpus-texmex.irisa.fr/}{\texttt{ A\+N\+N\+\_\+\+S\+I\+F\+T1M dataset}} using the provided vocabularies. Unix users should just write a similar launch\+\_\+indexer.\+sh script. 

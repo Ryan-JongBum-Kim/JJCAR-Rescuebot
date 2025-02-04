@@ -1,0 +1,55 @@
+\hypertarget{classDogController}{}\doxysection{Dog\+Controller Class Reference}
+\label{classDogController}\index{DogController@{DogController}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDogController_a80db413595230807024f47eb1273b9c8}{Dog\+Controller}} (ros\+::\+Node\+Handle nh)
+\begin{DoxyCompactList}\small\item\em Default constructor for dog. Sets up internal variables, subscribers, publishers and services. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classDogController_a7dbb7b8c3c6c69e539cc7bfd4002dbe2}{send\+Command}} (float x, float y, float th)
+\begin{DoxyCompactList}\small\item\em Sends a command to the robotics platform. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classDogController_a80db413595230807024f47eb1273b9c8}\label{classDogController_a80db413595230807024f47eb1273b9c8}} 
+\index{DogController@{DogController}!DogController@{DogController}}
+\index{DogController@{DogController}!DogController@{DogController}}
+\doxysubsubsection{\texorpdfstring{DogController()}{DogController()}}
+{\footnotesize\ttfamily Dog\+Controller\+::\+Dog\+Controller (\begin{DoxyParamCaption}\item[{ros\+::\+Node\+Handle}]{nh }\end{DoxyParamCaption})}
+
+
+
+Default constructor for dog. Sets up internal variables, subscribers, publishers and services. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em nh} & The R\+OS node handle, used to identify node instance \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classDogController_a7dbb7b8c3c6c69e539cc7bfd4002dbe2}\label{classDogController_a7dbb7b8c3c6c69e539cc7bfd4002dbe2}} 
+\index{DogController@{DogController}!sendCommand@{sendCommand}}
+\index{sendCommand@{sendCommand}!DogController@{DogController}}
+\doxysubsubsection{\texorpdfstring{sendCommand()}{sendCommand()}}
+{\footnotesize\ttfamily void Dog\+Controller\+::send\+Command (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{float}]{y,  }\item[{float}]{th }\end{DoxyParamCaption})}
+
+
+
+Sends a command to the robotics platform. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em x} & Positive moves forward, negative moves backward \\
+\hline
+\mbox{\texttt{ in}}  & {\em y} & Positive moves left, negative moves right \\
+\hline
+\mbox{\texttt{ in}}  & {\em th} & Positive rotates anti-\/clockwise, negative rotates clockwise \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+dog\+\_\+controller.\+h\item 
+dog\+\_\+controller.\+cpp\end{DoxyCompactItemize}

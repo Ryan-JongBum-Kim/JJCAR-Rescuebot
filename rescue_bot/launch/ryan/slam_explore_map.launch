@@ -1,0 +1,6 @@
+<launch>
+ <arg name="rviz" default="false"/>
+
+    <arg name="map_file" default="$(find spot_config)/maps/map.yaml"/>
+    <node pkg="map_server" type="map_server" name="map_server" args="$(arg map_file)" />
+</launch>

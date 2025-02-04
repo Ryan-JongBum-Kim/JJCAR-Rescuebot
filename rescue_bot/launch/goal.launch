@@ -1,0 +1,5 @@
+<launch>
+    <arg name="x_pos" default="0" />
+    <arg name="y_pos" default="0" />
+    <node pkg="rostopic" type="rostopic" name="goal_publisher" args="pub /move_base_simple/goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: map}, pose: {position: {x: $(arg x_pos), y: $(arg y_pos), z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}'" output="screen" />
+</launch>

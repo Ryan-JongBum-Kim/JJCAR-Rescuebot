@@ -1,0 +1,48 @@
+This is the landing site of the \mbox{\hyperlink{classRescueBot}{Rescue\+Bot}} project. This R\+OS package is for the use of controlling a quadruped robot to search an area and find targets that need to be rescued. For U\+TS 2023 -\/ Spring session.
+
+ 
+\begin{DoxyImage}
+\includegraphics[width=\textwidth,height=\textheight/2,keepaspectratio=true]{main.png}
+\doxyfigcaption{alt text}
+\end{DoxyImage}
+  \hypertarget{index_autotoc_md1}{}\doxysection{Installing the package}\label{index_autotoc_md1}
+To install this package, you can directly clone the repo into your catkin\+\_\+ws,
+
+If you have S\+SH setup, use that instead to not be prompted for authentication.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd \string~/catkin\_ws/src}
+\DoxyCodeLine{git clone git@github.com:imJohly/JJCAR-\/Rescuebot.git}
+\end{DoxyCode}
+
+
+Then build the package as usual,
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd \string~/catkin\_ws}
+\DoxyCodeLine{catkin\_make}
+\DoxyCodeLine{source \string~/catkin\_ws/devel/setup.bash}
+\end{DoxyCode}
+\hypertarget{index_autotoc_md2}{}\doxysection{Problem Statement}\label{index_autotoc_md2}
+\char`\"{}\+Search and rescue are a dangerous and costly task where emergency services need to quickly map out environments and localize rescue targets for a safe evacuation pathfinding. This means that rescue operations come with associated risks that need mitigation. Removing the need for humans to risk their lives would improve the overall process of search and rescue and minimise costs.\char`\"{}
+
+{\bfseries{Project Objectives}}
+\begin{DoxyItemize}
+\item Implementing Sensor Data and Spot A\+PI within R\+O\+S/\+Gazebo environment.
+\item Coding and Developing S\+L\+AM Algorithms and Pathfinding methods for Mapping and Localization.
+\item Testing performance and efficiency of Search \& Rescue method.
+\item Live demonstration of Search \& Rescue mission.
+\end{DoxyItemize}\hypertarget{index_autotoc_md3}{}\doxysection{How to run S\+L\+AM}\label{index_autotoc_md3}
+Launch a virtual environment that\textquotesingle{}s already in the package, 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{roslaunch rescue\_bot office\_small.launch}
+\end{DoxyCode}
+
+
+Then run the following command to launch S\+L\+AM, 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{roslaunch rescue\_bot slam.launch}
+\end{DoxyCode}
+ 

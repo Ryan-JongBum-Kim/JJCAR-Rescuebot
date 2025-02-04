@@ -1,0 +1,7 @@
+<launch>
+    <arg name="detect_threshold" default="0.7" />
+
+    <node pkg="rescue_bot_perception" type="marker_yolo.py" name="rescue_bot_perception"
+        args="-d $(arg detect_threshold)"
+        output="screen"/>
+</launch>
