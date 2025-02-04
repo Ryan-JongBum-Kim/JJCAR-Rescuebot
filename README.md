@@ -28,13 +28,3 @@ catkin_make
 - Testing performance and efficiency of Search & Rescue method.  
 - Live demonstration of Search & Rescue mission.
 
-
-## How do I access this repository?
-If you used HTTPS to clone the repo, copy below for the PAT when you need to validate the repository.
-```
-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
-```
-To validate the git repository run the following command,
-```bash
-git pull -v
-```
